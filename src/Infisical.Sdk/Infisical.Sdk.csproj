@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Infisical.Sdk</RootNamespace>
+    <LangVersion>10.0</LangVersion>
+
+
+    <Title>Infisical SDK</Title>
+    <Authors>Infisical</Authors>
+    <Description>.NET SDK for Infisical</Description>
+    <Copyright>Infisical</Copyright>
+    <Product>SDK</Product>
+
+    <RepositoryUrl>https://github.com/infisical/infisical-dotnet-sdk</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+
+    <PackageProjectUrl>https://infisical.com</PackageProjectUrl>
+    <PackageId>Infisical.Sdk</PackageId>
+    <PackageIcon>infisical.png</PackageIcon>
+    <PackageTags>Infisical;Sdk;.NET</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
+    <None Include="Infisical.png" Pack="true" PackagePath="\" />
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+    <None Include="../../LICENSE.txt" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug||AnyCPU' ">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+</Project>
