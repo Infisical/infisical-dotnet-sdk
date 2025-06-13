@@ -1,0 +1,36 @@
+name: Release .NET SDK
+run-name: Release .NET SDK
+
+on:
+    push:
+        tags:
+            - "*.*.*" # version, e.g. 1.0.0
+
+jobs:
+    build_dotnet:
+        name: Build .NET
+        runs-on: ubuntu-22.04
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+            - name: Set up .NET Core
+              uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
+              with:
+                  global-json-file: src/Infisical.Sdk/global.json
+
+            - name: Build .NET 8 Project
+              working-directory: src/Infisical.Sdk
+              run: |
+                  dotnet restore
+                  dotnet build --configuration Release
+
+            - name: Pack NuGet Package
+              env:
+                  VERSION: ${{ github.ref_name }}
+              run: dotnet pack --configuration Release -p:PackageID=Infisical.Sdk -p:Version=${{env.VERSION}} --output ./nuget-output /nologo /v:n
+              working-directory: src/Infisical.Sdk
+
+            - name: Publish NuGet Package
+              run: dotnet nuget push ./src/Infisical.Sdk/nuget-output/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json

@@ -1,9 +1,13 @@
-
-using System.Data.Common;
-using System.Net.Mail;
 using System.Text.Json.Serialization;
-using Infisical.Sdk.Client;
-using Infisical.Sdk.Util;
+
+
+// note(daniel): Polyfill that allows for the init keyword to be used in the model classes. This is not great, I am aware.
+#if !NET5_0_OR_GREATER
+namespace System.Runtime.CompilerServices
+{
+    internal static class IsExternalInit { }
+}
+#endif
 
 public enum SecretType
 {
