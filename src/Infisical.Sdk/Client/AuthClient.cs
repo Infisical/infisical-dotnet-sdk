@@ -15,12 +15,18 @@ public class UniversalAuth
 
   public async Task<MachineIdentityCredential> LoginAsync(string clientId, string clientSecret)
   {
+    try
+    {
+      var loginRequest = new UniversalAuthLoginRequest(clientId, clientSecret);
 
-    var loginRequest = new UniversalAuthLoginRequest(clientId, clientSecret);
-
-    var response = await _apiClient.PostAsync<UniversalAuthLoginRequest, MachineIdentityCredential>("/api/v1/auth/universal-auth/login", loginRequest);
-    _setAccessTokenFunc(response.AccessToken);
-    return response;
+      var response = await _apiClient.PostAsync<UniversalAuthLoginRequest, MachineIdentityCredential>("/api/v1/auth/universal-auth/login", loginRequest);
+      _setAccessTokenFunc(response.AccessToken);
+      return response;
+    }
+    catch (Exception e)
+    {
+      throw new InfisicalException("Failed to login", e);
+    }
   }
 
   private readonly ApiClient _apiClient;

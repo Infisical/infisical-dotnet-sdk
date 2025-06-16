@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Infisical.Sdk;
 
 
 // note(daniel): Polyfill that allows for the init keyword to be used in the model classes. This is not great, I am aware.
@@ -82,17 +83,17 @@ public class ListSecretsOptions
 
     if (string.IsNullOrEmpty(ProjectId))
     {
-      throw new Exception("ProjectId is required");
+      throw new InfisicalException("ProjectId is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
     {
-      throw new Exception("EnvironmentSlug is required");
+      throw new InfisicalException("EnvironmentSlug is required");
     }
 
     if (string.IsNullOrEmpty(SecretPath))
     {
-      throw new Exception("SecretPath is required");
+      throw new InfisicalException("SecretPath is required");
     }
   }
 }
@@ -130,22 +131,22 @@ public class GetSecretOptions
   {
     if (string.IsNullOrEmpty(ProjectId))
     {
-      throw new Exception("ProjectId is required");
+      throw new InfisicalException("ProjectId is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
     {
-      throw new Exception("EnvironmentSlug is required");
+      throw new InfisicalException("EnvironmentSlug is required");
     }
 
     if (string.IsNullOrEmpty(SecretPath))
     {
-      throw new Exception("SecretPath is required");
+      throw new InfisicalException("SecretPath is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
     {
-      throw new Exception("SecretName is required");
+      throw new InfisicalException("SecretName is required");
     }
   }
 }
@@ -185,34 +186,31 @@ public class CreateSecretOptions
   [JsonPropertyName("secretReminderNote")]
   public string? SecretReminderNote { get; init; } = null;
 
-  [JsonPropertyName("isRotatedSecret")]
-  public bool? IsRotatedSecret { get; init; } = null;
-
   internal void Validate()
   {
     if (string.IsNullOrEmpty(ProjectId))
     {
-      throw new Exception("ProjectId is required");
+      throw new InfisicalException("ProjectId is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
     {
-      throw new Exception("EnvironmentSlug is required");
+      throw new InfisicalException("EnvironmentSlug is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
     {
-      throw new Exception("SecretName is required");
+      throw new InfisicalException("SecretName is required");
     }
 
     if (string.IsNullOrEmpty(SecretValue))
     {
-      throw new Exception("SecretValue is required");
+      throw new InfisicalException("SecretValue is required");
     }
 
     if (string.IsNullOrEmpty(SecretPath))
     {
-      throw new Exception("SecretPath is required");
+      throw new InfisicalException("SecretPath is required");
     }
   }
 }
@@ -259,22 +257,22 @@ public class UpdateSecretOptions
   {
     if (string.IsNullOrEmpty(ProjectId))
     {
-      throw new Exception("ProjectId is required");
+      throw new InfisicalException("ProjectId is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
     {
-      throw new Exception("SecretName is required");
+      throw new InfisicalException("SecretName is required");
     }
 
     if (string.IsNullOrEmpty(SecretPath))
     {
-      throw new Exception("SecretPath is required");
+      throw new InfisicalException("SecretPath is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
     {
-      throw new Exception("EnvironmentSlug is required");
+      throw new InfisicalException("EnvironmentSlug is required");
     }
   }
 }
@@ -297,22 +295,22 @@ public class DeleteSecretOptions
   {
     if (string.IsNullOrEmpty(ProjectId))
     {
-      throw new Exception("ProjectId is required");
+      throw new InfisicalException("ProjectId is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
     {
-      throw new Exception("SecretName is required");
+      throw new InfisicalException("SecretName is required");
     }
 
     if (string.IsNullOrEmpty(SecretPath))
     {
-      throw new Exception("SecretPath is required");
+      throw new InfisicalException("SecretPath is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
     {
-      throw new Exception("EnvironmentSlug is required");
+      throw new InfisicalException("EnvironmentSlug is required");
     }
 
   }
