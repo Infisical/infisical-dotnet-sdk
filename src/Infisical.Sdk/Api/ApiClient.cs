@@ -43,7 +43,7 @@ namespace Infisical.Sdk.Api
       // Check if URL starts with protocol
       if (!System.Text.RegularExpressions.Regex.IsMatch(_baseUrl, @"^[a-zA-Z]+://.*"))
       {
-        _baseUrl = "http://" + _baseUrl;
+        _baseUrl = "https://" + _baseUrl;
       }
 
       // Remove /api if present at the end
