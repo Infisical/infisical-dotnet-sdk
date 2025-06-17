@@ -1,10 +1,7 @@
-using System.Text.Json;
 using Infisical.Sdk.Api;
-using Infisical.Sdk.Model;
 using Infisical.Sdk.Util;
 
 namespace Infisical.Sdk.Client;
-
 
 public class SecretsClient
 {

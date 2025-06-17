@@ -41,6 +41,12 @@ internal class Program
     var client = new InfisicalClient(settings);
     var _ = client.Auth().UniversalAuth().LoginAsync(machineIdentityClientId, machineIdentityClientSecret).Result;
 
+    // sleep for 10 seconds
+    Console.WriteLine("Sleeping for 5 seconds");
+    Thread.Sleep(5000);
+
+    Console.WriteLine("Done sleeping");
+
     var options = new ListSecretsOptions
     {
       SetSecretsAsEnvironmentVariables = true,
@@ -53,6 +59,10 @@ internal class Program
     };
     Console.WriteLine("\n\n\nList secrets response:");
     Console.WriteLine(JsonSerializer.Serialize(client.Secrets().ListAsync(options).Result, new JsonSerializerOptions { WriteIndented = true }));
+
+    // exit the program
+    Console.WriteLine("Exiting program");
+    Environment.Exit(0);
 
 
     var envVars = Environment.GetEnvironmentVariables();

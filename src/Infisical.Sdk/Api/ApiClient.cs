@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace Infisical.Sdk.Api
 {
@@ -17,6 +19,13 @@ namespace Infisical.Sdk.Api
     private readonly HttpClient _httpClient;
     private string? _accessToken;
     private string _baseUrl;
+
+    private static readonly IAsyncPolicy<HttpResponseMessage> RetryPolicy =
+    HttpPolicyExtensions
+        .HandleTransientHttpError() // HttpRequestException and 5XX/408 responses
+        .OrResult(msg => !msg.IsSuccessStatusCode)
+        .WaitAndRetryAsync(3, retryAttempt =>
+            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
     public ApiClient(string baseUrl, string? accessToken = null)
     {
@@ -151,15 +160,18 @@ namespace Infisical.Sdk.Api
           uriBuilder.Query = query.ToString();
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-        request.Headers.Add("Accept", "application/json");
 
-        if (!string.IsNullOrEmpty(_accessToken))
+        var response = await RetryPolicy.ExecuteAsync(async () =>
         {
-          request.Headers.Add("Authorization", $"Bearer {_accessToken}");
-        }
+          using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+          request.Headers.Add("Accept", "application/json");
 
-        var response = await _httpClient.SendAsync(request);
+          if (!string.IsNullOrEmpty(_accessToken))
+          {
+            request.Headers.Add("Authorization", $"Bearer {_accessToken}");
+          }
+          return await _httpClient.SendAsync(request);
+        });
 
         if (!response.IsSuccessStatusCode)
         {
