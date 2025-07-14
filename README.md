@@ -8,7 +8,7 @@ The Infisical .NET SDK provides a convenient way to interact with the Infisical 
 dotnet add package Infisical.Sdk
 ```
 
-## Getting Started
+## Getting Started (.NET)
 
 ```csharp
 namespace Example;
@@ -48,7 +48,42 @@ public class Program {
     }
   }
 }
+```
 
+## Getting Started (Visual Basic)
+```vb
+Imports Infisical.Sdk
+Imports Infisical.Sdk.Model
+
+Module Program
+    Sub Main(args As String())
+        Dim settings = New InfisicalSdkSettingsBuilder() _
+            .WithHostUri("https://app.infisical.com") _
+            .Build()
+        
+        Dim infisicalClient As New InfisicalClient(settings)
+
+        Dim authResult = infisicalClient.Auth().UniversalAuth() _
+          .LoginAsync("<machine-identity-universal-auth-client-id>", "machine-identity-universal-auth-client-secret").Result
+
+        Dim options As New ListSecretsOptions With {
+          .SetSecretsAsEnvironmentVariables = True,
+          .EnvironmentSlug = "<your-env-slug>",
+          .SecretPath = "/",
+          .ProjectId = "<your-project-id>"
+        }
+
+        Dim secrets = infisicalClient.Secrets().ListAsync(options).Result
+
+        For Each secret In secrets
+            Console.WriteLine(secret.SecretKey)
+            if Environment.GetEnvironmentVariable(secret.SecretKey) IsNot Nothing Then
+                Console.WriteLine("{0} found on environment variables", secret.SecretKey)
+            End If
+        Next
+        
+    End Sub
+End Module
 ```
 
 ## Core Methods
