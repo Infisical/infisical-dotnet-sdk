@@ -25,7 +25,7 @@ public class Program {
 
     var infisicalClient = new InfisicalClient(settings);
 
-    var _ = client.Auth().UniversalAuth().LoginAsync("<machine-identity-universal-auth-client-id>", "<machine-identity-universal-auth-client-secret>").Result;
+    var _ = infisicalClient.Auth().UniversalAuth().LoginAsync("<machine-identity-universal-auth-client-id>", "<machine-identity-universal-auth-client-secret>").Result;
 
     var options = new ListSecretsOptions
     {
@@ -35,7 +35,7 @@ public class Program {
       ProjectId = "<your-project-id>",
     };
 
-    var secrets = client.Secrets().ListAsync(options).Result;
+    var secrets = infisicalClient.Secrets().ListAsync(options).Result;
 
     if (secrets == null)
     {
