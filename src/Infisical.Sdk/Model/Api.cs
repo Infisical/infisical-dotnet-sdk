@@ -394,9 +394,6 @@ public class CertificateBundle
   public string SerialNumber { get; set; } = string.Empty;
 }
 
-
-
-
 public class SecretMetadata
 {
   [JsonPropertyName("key")]
