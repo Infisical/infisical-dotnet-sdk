@@ -92,10 +92,12 @@ The SDK methods are organized into the following high-level categories:
 
 1. `Auth()`: Handles authentication methods.
 2. `Secrets()`: Manages CRUD operations for secrets.
+3. `Pki()`: Programmatically interact with the Infisical PKI.
+    * `Subscribers()`: Manage PKI Subscribers.
 
-### `Auth`
+### `Auth()`
 
-The `Auth` component provides methods for authentication:
+The `Auth()` component provides methods for authentication:
 
 ### Universal Auth
 
@@ -112,9 +114,9 @@ var _ = await sdk.Auth().UniversalAuth().LoginAsync(
 - `clientId` (string): The client ID of your Machine Identity.
 - `clientSecret` (string): The client secret of your Machine Identity.
 
-### `Secrets`
+### `Secrets()`
 
-This sub-class handles operations related to secrets:
+The `Secrets()` sub-class handles operations related to the Infisical secrets management product.
 
 #### List Secrets
 
@@ -294,3 +296,59 @@ Secret deletedSecret = await sdk.Secrets().DeleteAsync(options);
 **Returns:**
 - `Task<Secret>`: The deleted secret.
 
+
+### `Pki().Subscribers()`
+
+The `Pki().Subscribers()` sub-class is used to programmatically interact with the Infisical PKI product line. Currently only issuing new certificates and retrieving the latest certificate bundle from a subscriber is supported. More widespread support for the PKI product is coming to the .NET SDK in the near future.
+
+
+#### Issue a new certificate
+
+```cs
+public async Task<SubscriberIssuedCertificate> IssueCertificateAsync(RetrieveLatestCertificateBundleOptions options);
+
+throws InfisicalException
+```
+
+```cs
+
+var options = new IssueCertificateOptions
+{
+  SubscriberName = "<subscriber-name>"
+  ProjectId = "<your-project-id>",
+};
+
+SubscriberIssuedCertificate newCertificate = await sdk.Pki().Subscribers().IssueCertificateAsync(options);
+```
+
+**Parameters:**
+- `SubscriberName` (string): The name of the subscriber to create a certificate for.
+- `ProjectId` (string): The ID of PKI project.
+
+**Returns:**
+- `Task<SubscriberIssuedCertificate>`: The newly issued certificate along with it's credentials for the specified subscriber.
+
+#### Retrieve latest certificate bundle
+
+```cs
+public async Task<CertificateBundle> RetrieveLatestCertificateBundleAsync(RetrieveLatestCertificateBundleOptions options)
+
+throws InfisicalException
+```
+
+```cs
+var options = new RetrieveLatestCertificateBundleOptions
+{
+  SubscriberName = "<subscriber-name>",
+  ProjectId = "<your-project-id>",
+};
+
+CertificateBundle latestCertificate = await sdk.Pki().Subscribers().RetrieveLatestCertificateBundleAsync(options);
+```
+
+**Parameters:**
+- `SubscriberName` (string): The name of the subscriber to retrieve the latest certificate bundle for
+- `ProjectId` (string): The ID of PKI project.
+
+**Returns:**
+- `Task<CertificateBundle>`: The latest certificate bundle for the specified subscriber.
