@@ -10,11 +10,13 @@ namespace Infisical.Sdk
     internal ApiClient _apiClient;
     private AuthClient _authClient;
     private SecretsClient _secretsClient;
+    private PkiClient _pkiClient;
     public InfisicalClient(InfisicalSdkSettings settings)
     {
       _apiClient = new ApiClient(settings.HostUri);
       _secretsClient = new SecretsClient(_apiClient);
       _authClient = new AuthClient(_apiClient, (accessToken) => _apiClient.SetAccessToken(accessToken));
+      _pkiClient = new PkiClient(_apiClient);
     }
 
     public AuthClient Auth()
@@ -25,6 +27,11 @@ namespace Infisical.Sdk
     public SecretsClient Secrets()
     {
       return _secretsClient;
+    }
+
+    public PkiClient Pki()
+    {
+      return _pkiClient;
     }
   }
 }

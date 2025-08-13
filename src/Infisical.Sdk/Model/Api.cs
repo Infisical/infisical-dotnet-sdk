@@ -317,6 +317,83 @@ public class DeleteSecretOptions
 
 }
 
+public class IssueCertificateOptions
+{
+  [JsonPropertyName("subscriberName")]
+  public string SubscriberName { get; init; } = string.Empty;
+
+  [JsonPropertyName("projectId")]
+  public string ProjectId { get; init; } = string.Empty;
+
+  internal void Validate()
+  {
+    if (string.IsNullOrEmpty(SubscriberName))
+    {
+      throw new InfisicalException("SubscriberName is required");
+    }
+
+    if (string.IsNullOrEmpty(ProjectId))
+    {
+      throw new InfisicalException("ProjectId is required");
+    }
+  }
+}
+
+public class SubscriberIssuedCertificate
+{
+  [JsonPropertyName("certificate")]
+  public string Certificate { get; set; } = string.Empty;
+
+  [JsonPropertyName("issuingCaCertificate")]
+  public string IssuingCaCertificate { get; set; } = string.Empty;
+
+  [JsonPropertyName("certificateChain")]
+  public string CertificateChain { get; set; } = string.Empty;
+
+  [JsonPropertyName("privateKey")]
+  public string PrivateKey { get; set; } = string.Empty;
+
+  [JsonPropertyName("serialNumber")]
+  public string SerialNumber { get; set; } = string.Empty;
+}
+
+public class RetrieveLatestCertificateBundleOptions
+{
+  [JsonPropertyName("subscriberName")]
+  public string SubscriberName { get; init; } = string.Empty;
+
+  [JsonPropertyName("projectId")]
+  public string ProjectId { get; init; } = string.Empty;
+
+  internal void Validate()
+  {
+    if (string.IsNullOrEmpty(SubscriberName))
+    {
+      throw new InfisicalException("SubscriberName is required");
+    }
+
+    if (string.IsNullOrEmpty(ProjectId))
+    {
+      throw new InfisicalException("ProjectId is required");
+    }
+  }
+}
+
+public class CertificateBundle
+{
+  [JsonPropertyName("certificate")]
+  public string Certificate { get; set; } = string.Empty;
+
+  [JsonPropertyName("certificateChain")]
+  public string CertificateChain { get; set; } = string.Empty;
+
+  [JsonPropertyName("privateKey")]
+  public string PrivateKey { get; set; } = string.Empty;
+
+  [JsonPropertyName("serialNumber")]
+  public string SerialNumber { get; set; } = string.Empty;
+}
+
 public class SecretMetadata
 {
   [JsonPropertyName("key")]
