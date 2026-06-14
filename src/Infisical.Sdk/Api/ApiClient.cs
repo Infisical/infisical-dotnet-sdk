@@ -23,7 +23,6 @@ namespace Infisical.Sdk.Api
     private static readonly IAsyncPolicy<HttpResponseMessage> RetryPolicy =
     HttpPolicyExtensions
         .HandleTransientHttpError() // HttpRequestException and 5XX/408 responses
-        .OrResult(msg => !msg.IsSuccessStatusCode)
         .WaitAndRetryAsync(3, retryAttempt =>
             TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
