@@ -29,8 +29,19 @@ public class SecretsClient
 
     try
     {
-      var response = await _apiClient.GetAsync<ProjectBySlugResponse>($"/api/v1/projects/slug/{projectSlug}").ConfigureAwait(false);
+      var escapedSlug = Uri.EscapeDataString(projectSlug);
+      var response = await _apiClient.GetAsync<ProjectBySlugResponse>($"/api/v1/projects/slug/{escapedSlug}").ConfigureAwait(false);
+
+      if (string.IsNullOrEmpty(response.Id))
+      {
+        throw new InfisicalException($"Project slug '{projectSlug}' resolved to an empty project ID");
+      }
+
       return response.Id;
+    }
+    catch (InfisicalException)
+    {
+      throw;
     }
     catch (Exception e)
     {
