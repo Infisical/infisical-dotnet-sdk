@@ -65,6 +65,7 @@ var secrets = await infisicalClient.Secrets().ListAsync(options);
 
 foreach (var secret in secrets)
 {
+    // ⚠️ Avoid logging secret values in production
     Console.WriteLine($"{secret.SecretKey}: {secret.SecretValue}");
 }
 ```
@@ -90,6 +91,8 @@ var settings = new InfisicalSdkSettingsBuilder()
     .WithHostUri("https://your-self-hosted-infisical.example.com")
     .Build();
 ```
+
+> **Important:** Only use trusted host URIs. The SDK sends authentication credentials to the configured host.
 
 ## Documentation
 You can find the full documentation for the .NET SDK on our [SDK documentation page](https://infisical.com/docs/sdks/languages/dotnet).
