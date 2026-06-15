@@ -11,11 +11,52 @@ public class SecretsClient
     _apiClient = apiClient;
   }
 
+  /// <summary>
+  /// Resolves a project slug to a project ID by calling the Infisical API.
+  /// If ProjectId is already set, this is a no-op.
+  /// </summary>
+  private async Task<string> ResolveProjectIdAsync(string? projectId, string? projectSlug)
+  {
+    if (!string.IsNullOrEmpty(projectId))
+    {
+      return projectId!;
+    }
+
+    if (string.IsNullOrEmpty(projectSlug))
+    {
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
+    }
+
+    try
+    {
+      var escapedSlug = Uri.EscapeDataString(projectSlug);
+      var response = await _apiClient.GetAsync<ProjectBySlugResponse>($"/api/v1/projects/slug/{escapedSlug}").ConfigureAwait(false);
+
+      if (string.IsNullOrEmpty(response.Id))
+      {
+        throw new InfisicalException($"Project slug '{projectSlug}' resolved to an empty project ID");
+      }
+
+      return response.Id;
+    }
+    catch (InfisicalException)
+    {
+      throw;
+    }
+    catch (Exception e)
+    {
+      throw new InfisicalException($"Failed to resolve project slug '{projectSlug}' to a project ID", e);
+    }
+  }
+
   public async Task<Secret[]> ListAsync(ListSecretsOptions options)
   {
     try
     {
       options.Validate();
+
+      // Resolve ProjectSlug to ProjectId if needed
+      options.ProjectId = await ResolveProjectIdAsync(options.ProjectId, options.ProjectSlug).ConfigureAwait(false);
 
       var dict = ObjectToDictionaryConverter.ToDictionary(options, false);
       dict.Remove("tagSlugs");
@@ -90,6 +131,9 @@ public class SecretsClient
 
       options.Validate();
 
+      // Resolve ProjectSlug to ProjectId if needed
+      options.ProjectId = await ResolveProjectIdAsync(options.ProjectId, options.ProjectSlug).ConfigureAwait(false);
+
       var dict = ObjectToDictionaryConverter.ToDictionary(options, false);
 
       var response = await _apiClient.GetAsync<GetSecretResponse>($"/api/v3/secrets/raw/{options.SecretName}", dict).ConfigureAwait(false);
@@ -114,6 +158,9 @@ public class SecretsClient
 
       options.Validate();
 
+      // Resolve ProjectSlug to ProjectId if needed
+      options.ProjectId = await ResolveProjectIdAsync(options.ProjectId, options.ProjectSlug).ConfigureAwait(false);
+
       var response = await _apiClient.PostAsync<CreateSecretOptions, CreateSecretResponse>($"/api/v3/secrets/raw/{options.SecretName}", options, true).ConfigureAwait(false);
       return response.Secret;
     }
@@ -128,6 +175,9 @@ public class SecretsClient
     try
     {
       options.Validate();
+
+      // Resolve ProjectSlug to ProjectId if needed
+      options.ProjectId = await ResolveProjectIdAsync(options.ProjectId, options.ProjectSlug).ConfigureAwait(false);
 
       var response = await _apiClient.PatchAsync<UpdateSecretOptions, UpdateSecretResponse>($"/api/v3/secrets/raw/{options.SecretName}", options, true).ConfigureAwait(false);
 
@@ -144,6 +194,10 @@ public class SecretsClient
     try
     {
       options.Validate();
+
+      // Resolve ProjectSlug to ProjectId if needed
+      options.ProjectId = await ResolveProjectIdAsync(options.ProjectId, options.ProjectSlug).ConfigureAwait(false);
+
       var response = await _apiClient.DeleteAsync<DeleteSecretOptions, DeleteSecretResponse>($"/api/v3/secrets/raw/{options.SecretName}", options, true).ConfigureAwait(false);
       return response.Secret;
     }
