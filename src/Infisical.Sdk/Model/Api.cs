@@ -81,7 +81,15 @@ public class ListSecretsOptions
   public bool SetSecretsAsEnvironmentVariables { get; set; } = false;
 
   [JsonPropertyName("workspaceId")]
-  public string? ProjectId { get; init; } = null;
+  public string? ProjectId { get; set; } = null;
+
+  /// <summary>
+  /// The human-readable slug of the project. Can be used as an alternative to ProjectId.
+  /// If both ProjectId and ProjectSlug are provided, ProjectId takes precedence.
+  /// </summary>
+  [JsonIgnore]
+  public string? ProjectSlug { get; init; } = null;
+
   [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
   [JsonPropertyName("secretPath")]
@@ -100,9 +108,9 @@ public class ListSecretsOptions
   internal void Validate()
   {
 
-    if (string.IsNullOrEmpty(ProjectId))
+    if (string.IsNullOrEmpty(ProjectId) && string.IsNullOrEmpty(ProjectSlug))
     {
-      throw new InfisicalException("ProjectId is required");
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
@@ -120,7 +128,14 @@ public class ListSecretsOptions
 public class GetSecretOptions
 {
   [JsonPropertyName("workspaceId")]
-  public string? ProjectId { get; init; } = null;
+  public string? ProjectId { get; set; } = null;
+
+  /// <summary>
+  /// The human-readable slug of the project. Can be used as an alternative to ProjectId.
+  /// If both ProjectId and ProjectSlug are provided, ProjectId takes precedence.
+  /// </summary>
+  [JsonIgnore]
+  public string? ProjectSlug { get; init; } = null;
 
   [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
@@ -148,9 +163,9 @@ public class GetSecretOptions
 
   internal void Validate()
   {
-    if (string.IsNullOrEmpty(ProjectId))
+    if (string.IsNullOrEmpty(ProjectId) && string.IsNullOrEmpty(ProjectSlug))
     {
-      throw new InfisicalException("ProjectId is required");
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
@@ -176,7 +191,14 @@ public class CreateSecretOptions
   public string SecretName { get; init; } = string.Empty;
 
   [JsonPropertyName("workspaceId")]
-  public string? ProjectId { get; init; } = null;
+  public string? ProjectId { get; set; } = null;
+
+  /// <summary>
+  /// The human-readable slug of the project. Can be used as an alternative to ProjectId.
+  /// If both ProjectId and ProjectSlug are provided, ProjectId takes precedence.
+  /// </summary>
+  [JsonIgnore]
+  public string? ProjectSlug { get; init; } = null;
 
   [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
@@ -207,9 +229,9 @@ public class CreateSecretOptions
 
   internal void Validate()
   {
-    if (string.IsNullOrEmpty(ProjectId))
+    if (string.IsNullOrEmpty(ProjectId) && string.IsNullOrEmpty(ProjectSlug))
     {
-      throw new InfisicalException("ProjectId is required");
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
     }
 
     if (string.IsNullOrEmpty(EnvironmentSlug))
@@ -243,7 +265,14 @@ public class UpdateSecretOptions
   public string? NewSecretName { get; init; } = null;
 
   [JsonPropertyName("workspaceId")]
-  public string? ProjectId { get; init; } = null;
+  public string? ProjectId { get; set; } = null;
+
+  /// <summary>
+  /// The human-readable slug of the project. Can be used as an alternative to ProjectId.
+  /// If both ProjectId and ProjectSlug are provided, ProjectId takes precedence.
+  /// </summary>
+  [JsonIgnore]
+  public string? ProjectSlug { get; init; } = null;
 
   [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
@@ -274,9 +303,9 @@ public class UpdateSecretOptions
 
   internal void Validate()
   {
-    if (string.IsNullOrEmpty(ProjectId))
+    if (string.IsNullOrEmpty(ProjectId) && string.IsNullOrEmpty(ProjectSlug))
     {
-      throw new InfisicalException("ProjectId is required");
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
@@ -302,7 +331,14 @@ public class DeleteSecretOptions
   public string SecretName { get; init; } = string.Empty;
 
   [JsonPropertyName("workspaceId")]
-  public string? ProjectId { get; init; } = null;
+  public string? ProjectId { get; set; } = null;
+
+  /// <summary>
+  /// The human-readable slug of the project. Can be used as an alternative to ProjectId.
+  /// If both ProjectId and ProjectSlug are provided, ProjectId takes precedence.
+  /// </summary>
+  [JsonIgnore]
+  public string? ProjectSlug { get; init; } = null;
 
   [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
@@ -312,9 +348,9 @@ public class DeleteSecretOptions
 
   internal void Validate()
   {
-    if (string.IsNullOrEmpty(ProjectId))
+    if (string.IsNullOrEmpty(ProjectId) && string.IsNullOrEmpty(ProjectSlug))
     {
-      throw new InfisicalException("ProjectId is required");
+      throw new InfisicalException("Either ProjectId or ProjectSlug is required");
     }
 
     if (string.IsNullOrEmpty(SecretName))
@@ -509,4 +545,16 @@ class DeleteSecretResponse
 {
   [JsonPropertyName("secret")]
   public Secret Secret { get; set; } = new Secret();
+}
+
+class ProjectBySlugResponse
+{
+  [JsonPropertyName("id")]
+  public string Id { get; set; } = string.Empty;
+
+  [JsonPropertyName("name")]
+  public string Name { get; set; } = string.Empty;
+
+  [JsonPropertyName("slug")]
+  public string Slug { get; set; } = string.Empty;
 }
