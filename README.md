@@ -26,10 +26,76 @@
 
 **[Infisical](https://infisical.com)** is the open source secret management platform that teams use to centralize their secrets like API keys, database credentials, and configurations.
 
-If you’re working with .NET, the official Infisical .NET SDK package is the easiest way to fetch and work with secrets for your application. You can read the documentation [here](https://infisical.com/docs/sdks/languages/dotnet).
+If you're working with .NET, the official Infisical .NET SDK package is the easiest way to fetch and work with secrets for your application. You can read the documentation [here](https://infisical.com/docs/sdks/languages/dotnet).
+
+## Installation
+
+```bash
+dotnet add package Infisical.Sdk
+```
+
+## Getting Started
+
+```csharp
+using Infisical.Sdk;
+using Infisical.Sdk.Model;
+
+var settings = new InfisicalSdkSettingsBuilder()
+    // Optional — defaults to https://app.infisical.com
+    .WithHostUri("https://app.infisical.com")
+    .Build();
+
+var infisicalClient = new InfisicalClient(settings);
+
+// Authenticate with Universal Auth
+var _ = await infisicalClient.Auth().UniversalAuth().LoginAsync(
+    "<machine-identity-client-id>",
+    "<machine-identity-client-secret>"
+);
+
+// Fetch secrets
+var options = new ListSecretsOptions
+{
+    EnvironmentSlug = "dev",
+    SecretPath = "/",
+    ProjectId = "<your-project-id>",
+};
+
+var secrets = await infisicalClient.Secrets().ListAsync(options);
+
+foreach (var secret in secrets)
+{
+    // ⚠️ Avoid logging secret values in production
+    Console.WriteLine($"{secret.SecretKey}: {secret.SecretValue}");
+}
+```
+
+### EU Region
+
+If you signed up for Infisical's **EU (European Union)** data region, configure the host URI to point to the EU instance:
+
+```csharp
+var settings = new InfisicalSdkSettingsBuilder()
+    .WithHostUri("https://eu.infisical.com")
+    .Build();
+```
+
+> **Note:** The default host URI is `https://app.infisical.com` (US region). If you selected "Europe" during sign-up, you **must** set the host URI to `https://eu.infisical.com` — otherwise, authentication will fail.
+
+### Self-Hosted
+
+For self-hosted Infisical instances, point to your own deployment:
+
+```csharp
+var settings = new InfisicalSdkSettingsBuilder()
+    .WithHostUri("https://your-self-hosted-infisical.example.com")
+    .Build();
+```
+
+> **Important:** Only use trusted host URIs. The SDK sends authentication credentials to the configured host.
 
 ## Documentation
-You can find the documentation for the .NET SDK on our [SDK documentation page](https://infisical.com/docs/sdks/languages/dotnet).
+You can find the full documentation for the .NET SDK on our [SDK documentation page](https://infisical.com/docs/sdks/languages/dotnet).
 
 ## Security
 
