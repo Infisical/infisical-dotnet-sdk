@@ -90,6 +90,12 @@ namespace Infisical.Sdk.Model
   {
     public string HostUri { get; internal set; } = "https://app.infisical.com";
 
+    /// <summary>
+    /// When true, the SDK automatically checks for the INFISICAL_TOKEN environment
+    /// variable at initialization and uses it if present. Defaults to true.
+    /// </summary>
+    public bool AutoDetectToken { get; internal set; } = true;
+
     internal InfisicalSdkSettings() { }
   }
 
@@ -103,12 +109,24 @@ namespace Infisical.Sdk.Model
       return this;
     }
 
+    /// <summary>
+    /// Controls whether the SDK automatically detects and uses the INFISICAL_TOKEN
+    /// environment variable for authentication. Defaults to true.
+    /// Set to false to require explicit authentication.
+    /// </summary>
+    public InfisicalSdkSettingsBuilder WithAutoDetectToken(bool autoDetect)
+    {
+      _settings.AutoDetectToken = autoDetect;
+      return this;
+    }
+
     public InfisicalSdkSettings Build()
     {
       // we return a new class to make it immutable
       return new InfisicalSdkSettings
       {
-        HostUri = _settings.HostUri
+        HostUri = _settings.HostUri,
+        AutoDetectToken = _settings.AutoDetectToken
       };
     }
   }

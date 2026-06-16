@@ -62,6 +62,35 @@ public class LdapAuth
   private readonly Action<string> _setAccessTokenFunc;
 }
 
+/// <summary>
+/// Authenticates using a pre-existing access token (e.g. from INFISICAL_TOKEN env var
+/// or from a local CLI session).
+/// </summary>
+public class AccessTokenAuth
+{
+
+  public AccessTokenAuth(Action<string> setAccessTokenFunc)
+  {
+    _setAccessTokenFunc = setAccessTokenFunc;
+  }
+
+  /// <summary>
+  /// Authenticates the SDK using a raw access token.
+  /// No network call is made — the token is used directly for subsequent API requests.
+  /// </summary>
+  public void Login(string accessToken)
+  {
+    if (string.IsNullOrEmpty(accessToken))
+    {
+      throw new InfisicalException("Access token cannot be null or empty");
+    }
+
+    _setAccessTokenFunc(accessToken);
+  }
+
+  private readonly Action<string> _setAccessTokenFunc;
+}
+
 
 
 public class AuthClient
@@ -69,6 +98,7 @@ public class AuthClient
   private readonly ApiClient _apiClient;
   UniversalAuth _universalAuth;
   LdapAuth _ldapAuth;
+  AccessTokenAuth _accessTokenAuth;
   private readonly Action<string> _setAccessTokenFunc;
 
   public AuthClient(ApiClient apiClient, Action<string> setAccessTokenFunc)
@@ -77,6 +107,7 @@ public class AuthClient
     _setAccessTokenFunc = setAccessTokenFunc;
     _universalAuth = new UniversalAuth(_apiClient, _setAccessTokenFunc);
     _ldapAuth = new LdapAuth(_apiClient, _setAccessTokenFunc);
+    _accessTokenAuth = new AccessTokenAuth(_setAccessTokenFunc);
   }
 
   public UniversalAuth UniversalAuth()
@@ -87,5 +118,13 @@ public class AuthClient
   public LdapAuth LdapAuth()
   {
     return _ldapAuth;
+  }
+
+  /// <summary>
+  /// Returns the access token auth handler for direct token-based authentication.
+  /// </summary>
+  public AccessTokenAuth AccessTokenAuth()
+  {
+    return _accessTokenAuth;
   }
 }
