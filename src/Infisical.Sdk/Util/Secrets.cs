@@ -15,7 +15,7 @@ namespace Infisical.Sdk.Util
       var secretMap = new Dictionary<string, Secret>();
       foreach (var secret in secrets)
       {
-        var compositeKey = $"{secret.SecretPath}:{secret.SecretKey}";
+        var compositeKey = $"{secret.SecretPath}\0{secret.SecretKey}";
         secretMap[compositeKey] = secret;
       }
 
