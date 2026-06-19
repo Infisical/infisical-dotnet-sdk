@@ -92,9 +92,9 @@ namespace Infisical.Sdk.Model
 
     /// <summary>
     /// When true, the SDK automatically checks for the INFISICAL_TOKEN environment
-    /// variable at initialization and uses it if present. Defaults to true.
+    /// variable at initialization and uses it if present. Defaults to false.
     /// </summary>
-    public bool AutoDetectToken { get; internal set; } = true;
+    public bool AutoDetectToken { get; internal set; } = false;
 
     internal InfisicalSdkSettings() { }
   }
@@ -111,8 +111,8 @@ namespace Infisical.Sdk.Model
 
     /// <summary>
     /// Controls whether the SDK automatically detects and uses the INFISICAL_TOKEN
-    /// environment variable for authentication. Defaults to true.
-    /// Set to false to require explicit authentication.
+    /// environment variable for authentication. Defaults to false.
+    /// Set to true to enable zero-config local development auth.
     /// </summary>
     public InfisicalSdkSettingsBuilder WithAutoDetectToken(bool autoDetect)
     {
