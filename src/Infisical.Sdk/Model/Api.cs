@@ -379,17 +379,42 @@ public class CreateFolderOptions
 
 public class EnsureFolderPathOptions
 {
-  [JsonPropertyName("projectId")]
   public string? ProjectId { get; init; } = null;
 
-  [JsonPropertyName("environment")]
   public string? EnvironmentSlug { get; init; } = null;
 
-  [JsonPropertyName("path")]
   public string Path { get; init; } = "/";
 
-  [JsonPropertyName("description")]
   public string? Description { get; init; } = null;
+
+  internal void Validate()
+  {
+    if (string.IsNullOrEmpty(ProjectId))
+    {
+      throw new InfisicalException("ProjectId is required");
+    }
+
+    if (string.IsNullOrEmpty(EnvironmentSlug))
+    {
+      throw new InfisicalException("EnvironmentSlug is required");
+    }
+
+    if (string.IsNullOrEmpty(Path))
+    {
+      throw new InfisicalException("Path is required");
+    }
+  }
+}
+
+public class ListFoldersOptions
+{
+  public string? ProjectId { get; init; } = null;
+
+  public string? EnvironmentSlug { get; init; } = null;
+
+  public string Path { get; init; } = "/";
+
+  public bool Recursive { get; init; } = false;
 
   internal void Validate()
   {
@@ -444,6 +469,9 @@ public class InfisicalFolder
 
   [JsonPropertyName("path")]
   public string Path { get; set; } = string.Empty;
+
+  [JsonPropertyName("relativePath")]
+  public string RelativePath { get; set; } = string.Empty;
 }
 
 
@@ -616,6 +644,24 @@ class UpdateSecretResponse
   public Secret Secret { get; set; } = new Secret();
 }
 
+
+class ListFoldersResponse
+{
+  [JsonPropertyName("folders")]
+  public InfisicalFolder[] Folders { get; set; } = Array.Empty<InfisicalFolder>();
+}
+
+class FolderApiError
+{
+  [JsonPropertyName("statusCode")]
+  public int? StatusCode { get; set; }
+
+  [JsonPropertyName("error")]
+  public string? Error { get; set; }
+
+  [JsonPropertyName("message")]
+  public string? Message { get; set; }
+}
 
 class CreateFolderResponse
 {

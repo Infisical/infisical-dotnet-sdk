@@ -13,7 +13,7 @@ internal class Program
         .Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
   }
 
-  private static void Main(string[] args)
+  private static async Task Main(string[] args)
   {
 
     var machineIdentityClientId = Environment.GetEnvironmentVariable("INFISICAL_MACHINE_IDENTITY_CLIENT_ID");
@@ -39,7 +39,7 @@ internal class Program
 
 
     var client = new InfisicalClient(settings);
-    var _ = client.Auth().UniversalAuth().LoginAsync(machineIdentityClientId, machineIdentityClientSecret).Result;
+    var _ = await client.Auth().UniversalAuth().LoginAsync(machineIdentityClientId, machineIdentityClientSecret);
 
     // sleep for 10 seconds
     Console.WriteLine("Sleeping for 5 seconds");
@@ -64,7 +64,7 @@ internal class Program
     };
 
     Console.WriteLine("\n\n\nEnsure folder path response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Folders().EnsurePathAsync(ensureFolderPathOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Folders().EnsurePathAsync(ensureFolderPathOptions), new JsonSerializerOptions { WriteIndented = true }));
 
     var newSecretName = $".NET-SDK-TEST-{RandomString(32)}";
 
@@ -78,7 +78,7 @@ internal class Program
     };
 
     Console.WriteLine("\n\n\nCreate secret response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Secrets().CreateAsync(createSecretOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Secrets().CreateAsync(createSecretOptions), new JsonSerializerOptions { WriteIndented = true }));
 
     var options = new ListSecretsOptions
     {
@@ -91,7 +91,7 @@ internal class Program
       // ViewSecretValue = true,
     };
     Console.WriteLine("\n\n\nList secrets response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Secrets().ListAsync(options).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Secrets().ListAsync(options), new JsonSerializerOptions { WriteIndented = true }));
 
     var getSecretOptions = new GetSecretOptions
     {
@@ -101,7 +101,7 @@ internal class Program
       ProjectId = projectId,
     };
     Console.WriteLine("\n\n\nGet secret response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Secrets().GetAsync(getSecretOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Secrets().GetAsync(getSecretOptions), new JsonSerializerOptions { WriteIndented = true }));
 
 
     // Close the Universal Auth client and create a new one with LDAP Auth
@@ -123,7 +123,7 @@ internal class Program
       try
       {
         Console.WriteLine("Authenticating with LDAP...");
-        var ldapCredential = ldapClient.Auth().LdapAuth().LoginAsync(ldapIdentityId, ldapUsername, ldapPassword).Result;
+        var ldapCredential = await ldapClient.Auth().LdapAuth().LoginAsync(ldapIdentityId, ldapUsername, ldapPassword);
         Console.WriteLine($"✅ LDAP Auth successful! Token: {ldapCredential.AccessToken.Substring(0, Math.Min(20, ldapCredential.AccessToken.Length))}...");
         Console.WriteLine($"   Expires In: {ldapCredential.ExpiresIn} seconds");
         
@@ -152,7 +152,7 @@ internal class Program
     };
 
     Console.WriteLine("\n\n\nUpdate secret response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Secrets().UpdateAsync(updateSecretOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Secrets().UpdateAsync(updateSecretOptions), new JsonSerializerOptions { WriteIndented = true }));
 
 
     var deleteSecretOptions = new DeleteSecretOptions
@@ -164,6 +164,6 @@ internal class Program
     };
 
     Console.WriteLine("\n\n\nDelete secret response:");
-    Console.WriteLine(JsonSerializer.Serialize(client.Secrets().DeleteAsync(deleteSecretOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine(JsonSerializer.Serialize(await client.Secrets().DeleteAsync(deleteSecretOptions), new JsonSerializerOptions { WriteIndented = true }));
   }
 }

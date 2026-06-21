@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Infisical.Sdk.Api;
 using Infisical.Sdk.Model;
 
@@ -28,13 +29,36 @@ public class FoldersClient
     }
   }
 
+  public async Task<InfisicalFolder[]> ListAsync(ListFoldersOptions options)
+  {
+    try
+    {
+      options.Validate();
+
+      var queryParams = new Dictionary<string, string>
+      {
+        ["projectId"] = options.ProjectId!,
+        ["environment"] = options.EnvironmentSlug!,
+        ["path"] = options.Path,
+        ["recursive"] = options.Recursive.ToString().ToLowerInvariant()
+      };
+
+      var response = await _apiClient.GetAsync<ListFoldersResponse>("/api/v2/folders", queryParams).ConfigureAwait(false);
+      return response.Folders;
+    }
+    catch (Exception e)
+    {
+      throw new InfisicalException("Failed to list folders", e);
+    }
+  }
+
   public async Task<IReadOnlyList<InfisicalFolder>> EnsurePathAsync(EnsureFolderPathOptions options)
   {
     try
     {
       options.Validate();
 
-      var createdFolders = new List<InfisicalFolder>();
+      var ensuredFolders = new List<InfisicalFolder>();
       var parentPath = "/";
       var segments = options.Path
         .Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
@@ -44,6 +68,14 @@ public class FoldersClient
 
       foreach (var segment in segments)
       {
+        var existingFolder = await FindFolderAsync(options.ProjectId!, options.EnvironmentSlug!, parentPath, segment).ConfigureAwait(false);
+        if (existingFolder != null)
+        {
+          ensuredFolders.Add(existingFolder);
+          parentPath = AppendPathSegment(parentPath, segment);
+          continue;
+        }
+
         var createOptions = new CreateFolderOptions
         {
           ProjectId = options.ProjectId,
@@ -56,17 +88,27 @@ public class FoldersClient
         var response = await _apiClient.PostForResponseAsync<CreateFolderOptions, CreateFolderResponse>("/api/v2/folders", createOptions, true).ConfigureAwait(false);
         if (response.IsSuccessStatusCode)
         {
-          createdFolders.Add(response.Value!.Folder);
+          ensuredFolders.Add(response.Value!.Folder);
+          parentPath = AppendPathSegment(parentPath, segment);
+          continue;
         }
-        else if (!IsAlreadyExistsResponse(response.StatusCode, response.Content))
+
+        if (!IsAlreadyExistsResponse(response.StatusCode, response.Content))
         {
           throw new InfisicalException(response.FormatErrorMessage());
         }
 
-        parentPath = parentPath == "/" ? "/" + segment : parentPath + "/" + segment;
+        existingFolder = await FindFolderAsync(options.ProjectId!, options.EnvironmentSlug!, parentPath, segment).ConfigureAwait(false);
+        if (existingFolder == null)
+        {
+          throw new InfisicalException($"Infisical reported folder '{segment}' already exists under '{parentPath}', but listing the parent path did not return it.");
+        }
+
+        ensuredFolders.Add(existingFolder);
+        parentPath = AppendPathSegment(parentPath, segment);
       }
 
-      return createdFolders;
+      return ensuredFolders;
     }
     catch (Exception e) when (!(e is InfisicalException))
     {
@@ -81,8 +123,54 @@ public class FoldersClient
       return false;
     }
 
-    return responseBody.IndexOf("already exists", StringComparison.OrdinalIgnoreCase) >= 0 ||
-           responseBody.IndexOf("folder already", StringComparison.OrdinalIgnoreCase) >= 0 ||
-           responseBody.IndexOf("duplicate", StringComparison.OrdinalIgnoreCase) >= 0;
+    var apiError = TryParseApiError(responseBody);
+    if (apiError == null)
+    {
+      return false;
+    }
+
+    if (apiError.StatusCode.HasValue && apiError.StatusCode.Value != (int)statusCode)
+    {
+      return false;
+    }
+
+    var message = apiError.Message ?? string.Empty;
+    return message.IndexOf("folder", StringComparison.OrdinalIgnoreCase) >= 0 &&
+           message.IndexOf("already exist", StringComparison.OrdinalIgnoreCase) >= 0;
+  }
+
+  private async Task<InfisicalFolder?> FindFolderAsync(string projectId, string environmentSlug, string parentPath, string folderName)
+  {
+    var folders = await ListAsync(new ListFoldersOptions
+    {
+      ProjectId = projectId,
+      EnvironmentSlug = environmentSlug,
+      Path = parentPath,
+      Recursive = false
+    }).ConfigureAwait(false);
+
+    return folders.FirstOrDefault(folder =>
+      string.Equals(folder.Name, folderName, StringComparison.Ordinal) ||
+      string.Equals(folder.RelativePath, AppendPathSegment(parentPath, folderName), StringComparison.Ordinal));
+  }
+
+  private static string AppendPathSegment(string parentPath, string segment)
+  {
+    return parentPath == "/" ? "/" + segment : parentPath + "/" + segment;
+  }
+
+  private static FolderApiError? TryParseApiError(string responseBody)
+  {
+    try
+    {
+      return JsonSerializer.Deserialize<FolderApiError>(responseBody, new JsonSerializerOptions
+      {
+        PropertyNameCaseInsensitive = true
+      });
+    }
+    catch (JsonException)
+    {
+      return null;
+    }
   }
 }
