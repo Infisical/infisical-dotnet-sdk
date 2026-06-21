@@ -54,13 +54,25 @@ internal class Program
       Console.WriteLine($"{envVar} {Environment.NewLine}");
     }
 
+    var folderPath = $"/test/{RandomString(8)}";
+    var ensureFolderPathOptions = new EnsureFolderPathOptions
+    {
+      EnvironmentSlug = "dev",
+      Path = folderPath,
+      ProjectId = projectId,
+      Description = ".NET SDK sample folder"
+    };
+
+    Console.WriteLine("\n\n\nEnsure folder path response:");
+    Console.WriteLine(JsonSerializer.Serialize(client.Folders().EnsurePathAsync(ensureFolderPathOptions).Result, new JsonSerializerOptions { WriteIndented = true }));
+
     var newSecretName = $".NET-SDK-TEST-{RandomString(32)}";
 
     var createSecretOptions = new CreateSecretOptions
     {
       SecretName = newSecretName,
       EnvironmentSlug = "dev",
-      SecretPath = "/test",
+      SecretPath = folderPath,
       SecretValue = RandomString(10),
       ProjectId = projectId,
     };
@@ -72,7 +84,7 @@ internal class Program
     {
       SetSecretsAsEnvironmentVariables = true,
       EnvironmentSlug = "dev",
-      SecretPath = "/test",
+      SecretPath = folderPath,
       Recursive = true,
       // ExpandSecretReferences = true,
       ProjectId = projectId,
@@ -85,7 +97,7 @@ internal class Program
     {
       SecretName = newSecretName,
       EnvironmentSlug = "dev",
-      SecretPath = "/test",
+      SecretPath = folderPath,
       ProjectId = projectId,
     };
     Console.WriteLine("\n\n\nGet secret response:");
@@ -133,7 +145,7 @@ internal class Program
     {
       SecretName = newSecretName,
       EnvironmentSlug = "dev",
-      SecretPath = "/test",
+      SecretPath = folderPath,
       NewSecretName = $"{newSecretName}-updated-name",
       NewSecretValue = $"{RandomString(10)}-updated-value",
       ProjectId = projectId,
@@ -147,7 +159,7 @@ internal class Program
     {
       SecretName = $"{newSecretName}-updated-name",
       EnvironmentSlug = "dev",
-      SecretPath = "/test",
+      SecretPath = folderPath,
       ProjectId = projectId,
     };
 

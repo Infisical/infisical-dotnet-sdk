@@ -336,6 +336,117 @@ public class DeleteSecretOptions
 
 }
 
+public class CreateFolderOptions
+{
+  [JsonPropertyName("projectId")]
+  public string? ProjectId { get; init; } = null;
+
+  [JsonPropertyName("environment")]
+  public string? EnvironmentSlug { get; init; } = null;
+
+  [JsonPropertyName("name")]
+  public string Name { get; init; } = string.Empty;
+
+  [JsonPropertyName("path")]
+  public string Path { get; init; } = "/";
+
+  [JsonPropertyName("description")]
+  public string? Description { get; init; } = null;
+
+  internal void Validate()
+  {
+    if (string.IsNullOrEmpty(ProjectId))
+    {
+      throw new InfisicalException("ProjectId is required");
+    }
+
+    if (string.IsNullOrEmpty(EnvironmentSlug))
+    {
+      throw new InfisicalException("EnvironmentSlug is required");
+    }
+
+    if (string.IsNullOrEmpty(Name))
+    {
+      throw new InfisicalException("Name is required");
+    }
+
+    if (string.IsNullOrEmpty(Path))
+    {
+      throw new InfisicalException("Path is required");
+    }
+  }
+}
+
+public class EnsureFolderPathOptions
+{
+  [JsonPropertyName("projectId")]
+  public string? ProjectId { get; init; } = null;
+
+  [JsonPropertyName("environment")]
+  public string? EnvironmentSlug { get; init; } = null;
+
+  [JsonPropertyName("path")]
+  public string Path { get; init; } = "/";
+
+  [JsonPropertyName("description")]
+  public string? Description { get; init; } = null;
+
+  internal void Validate()
+  {
+    if (string.IsNullOrEmpty(ProjectId))
+    {
+      throw new InfisicalException("ProjectId is required");
+    }
+
+    if (string.IsNullOrEmpty(EnvironmentSlug))
+    {
+      throw new InfisicalException("EnvironmentSlug is required");
+    }
+
+    if (string.IsNullOrEmpty(Path))
+    {
+      throw new InfisicalException("Path is required");
+    }
+  }
+}
+
+public class InfisicalFolder
+{
+  [JsonPropertyName("id")]
+  public string Id { get; set; } = string.Empty;
+
+  [JsonPropertyName("name")]
+  public string Name { get; set; } = string.Empty;
+
+  [JsonPropertyName("version")]
+  public decimal? Version { get; set; } = null;
+
+  [JsonPropertyName("createdAt")]
+  public DateTime CreatedAt { get; set; }
+
+  [JsonPropertyName("updatedAt")]
+  public DateTime UpdatedAt { get; set; }
+
+  [JsonPropertyName("envId")]
+  public string EnvironmentId { get; set; } = string.Empty;
+
+  [JsonPropertyName("parentId")]
+  public string? ParentId { get; set; } = null;
+
+  [JsonPropertyName("isReserved")]
+  public bool? IsReserved { get; set; } = null;
+
+  [JsonPropertyName("description")]
+  public string? Description { get; set; } = null;
+
+  [JsonPropertyName("lastSecretModified")]
+  public DateTime? LastSecretModified { get; set; } = null;
+
+  [JsonPropertyName("path")]
+  public string Path { get; set; } = string.Empty;
+}
+
+
 public class IssueCertificateOptions
 {
   [JsonPropertyName("subscriberName")]
@@ -505,6 +616,12 @@ class UpdateSecretResponse
   public Secret Secret { get; set; } = new Secret();
 }
 
+
+class CreateFolderResponse
+{
+  [JsonPropertyName("folder")]
+  public InfisicalFolder Folder { get; set; } = new InfisicalFolder();
+}
 class DeleteSecretResponse
 {
   [JsonPropertyName("secret")]
