@@ -92,51 +92,61 @@ namespace Infisical.Sdk.Api
       return message;
     }
 
+    internal async Task<ApiResponse<TResponse>> PostForResponseAsync<TRequest, TResponse>(string url, TRequest requestBody, bool omitNullValues = false)
+    {
+      var jsonContent = omitNullValues ? JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }) : JsonSerializer.Serialize(requestBody);
+      var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+      var request = new HttpRequestMessage(HttpMethod.Post, new Uri(new Uri(_baseUrl), url))
+      {
+        Content = content
+      };
+
+      request.Headers.Add("Accept", "application/json");
+
+      if (!string.IsNullOrEmpty(_accessToken))
+      {
+        request.Headers.Add("Authorization", $"Bearer {_accessToken}");
+      }
+
+      var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+      var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        return ApiResponse<TResponse>.Failure(response.StatusCode, response.ReasonPhrase, responseContent);
+      }
+
+      if (string.IsNullOrEmpty(responseContent))
+      {
+        throw new HttpRequestException("Response body is null or empty");
+      }
+
+      var result = JsonSerializer.Deserialize<TResponse>(responseContent, new JsonSerializerOptions
+      {
+        PropertyNameCaseInsensitive = true
+      });
+
+      if (result == null)
+      {
+        throw new InfisicalException("Failed to deserialize response content");
+      }
+
+      return ApiResponse<TResponse>.Success(response.StatusCode, response.ReasonPhrase, responseContent, result);
+    }
+
     public async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest requestBody, bool omitNullValues = false)
     {
       try
       {
-        var jsonContent = omitNullValues ? JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }) : JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(new Uri(_baseUrl), url))
-        {
-          Content = content
-        };
-
-        request.Headers.Add("Accept", "application/json");
-
-        if (!string.IsNullOrEmpty(_accessToken))
-        {
-          request.Headers.Add("Authorization", $"Bearer {_accessToken}");
-        }
-
-        var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+        var response = await PostForResponseAsync<TRequest, TResponse>(url, requestBody, omitNullValues).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {
-          var errorMessage = await FormatErrorMessageAsync(response).ConfigureAwait(false);
-          throw new HttpRequestException(errorMessage);
+          throw new HttpRequestException(response.FormatErrorMessage());
         }
 
-        var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-        if (string.IsNullOrEmpty(responseContent))
-        {
-          throw new HttpRequestException("Response body is null or empty");
-        }
-
-        var result = JsonSerializer.Deserialize<TResponse>(responseContent, new JsonSerializerOptions
-        {
-          PropertyNameCaseInsensitive = true
-        });
-
-        if (result == null)
-        {
-          throw new InfisicalException("Failed to deserialize response content");
-        }
-
-        return result;
+        return response.Value!;
       }
       catch (Exception ex) when (!(ex is InfisicalException))
       {
@@ -332,6 +342,45 @@ namespace Infisical.Sdk.Api
     public Dictionary<string, string> Build()
     {
       return new Dictionary<string, string>(_params);
+    }
+  }
+
+  internal class ApiResponse<T>
+  {
+    private ApiResponse(System.Net.HttpStatusCode statusCode, string? reasonPhrase, string content, T? value, bool isSuccessStatusCode)
+    {
+      StatusCode = statusCode;
+      ReasonPhrase = reasonPhrase;
+      Content = content;
+      Value = value;
+      IsSuccessStatusCode = isSuccessStatusCode;
+    }
+
+    public System.Net.HttpStatusCode StatusCode { get; }
+    public string? ReasonPhrase { get; }
+    public string Content { get; }
+    public T? Value { get; }
+    public bool IsSuccessStatusCode { get; }
+
+    public static ApiResponse<T> Success(System.Net.HttpStatusCode statusCode, string? reasonPhrase, string content, T value)
+    {
+      return new ApiResponse<T>(statusCode, reasonPhrase, content, value, true);
+    }
+
+    public static ApiResponse<T> Failure(System.Net.HttpStatusCode statusCode, string? reasonPhrase, string content)
+    {
+      return new ApiResponse<T>(statusCode, reasonPhrase, content, default, false);
+    }
+
+    public string FormatErrorMessage()
+    {
+      var message = $"Unexpected response: {StatusCode} {ReasonPhrase}";
+      if (!string.IsNullOrEmpty(Content))
+      {
+        message += $" - {Content}";
+      }
+
+      return message;
     }
   }
 }
